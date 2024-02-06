@@ -1,0 +1,10 @@
+{
+  "name":"drive-s3-wrapper",
+  "version": "0.01",
+  "author":"David Glaeseman",
+  "description":"Agnostic wrapper for AWS S3 ➔ But inteded to be used by adonis.js",
+  "license":"MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.507.0"
+  }
+}
