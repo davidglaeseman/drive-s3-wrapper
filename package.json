@@ -1,13 +1,20 @@
 {
-  "name":"drive-s3-wrapper",
+  "name": "drive-s3-wrapper",
   "version": "0.01",
-  "author":"David Glaeseman",
-  "description":"Agnostic wrapper for AWS S3 ➔ But intended to be used by adonis.js",
-  "license":"MIT",
+  "author": "David Glaeseman",
+  "type": "module",
+  "description": "Agnostic wrapper for AWS S3 ➔ But intended to be used by adonis.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx build && tsdx test"
+  },
   "publishConfig": {
     "@davidglaeseman:registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.507.0"
+    "@aws-sdk/client-s3": "^3.507.0",
+    "tsdx": "^0.14.1"
   }
 }
