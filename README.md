@@ -53,5 +53,13 @@ console.log({ urlFormattedPNG })
 ````typescript
 const { put } = s3Drive(s3Config)
 const rawImageUpload = await put(filePath,convertBase64StringToImageData('data:image/png;base64,iVBORw0KG'))
-console.log({ putResponse })
+console.log({ rawImageUpload })
+````
+
+#### determineMimeType
+````typescript
+const { determineMimeType } = s3Drive(s3Config)
+const filePath = 'i-am-a-file.txt'
+const mimeType = determineMimeType(filePath)
+console.log({mimeType})
 ````

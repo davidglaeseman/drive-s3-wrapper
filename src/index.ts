@@ -5,6 +5,7 @@ import {
     S3Client
 } from "@aws-sdk/client-s3";
 import * as mime from 'mime-types'
+import {ResponseMetadata} from "@smithy/types/dist-types/response";
 
 export interface S3DriveConfig{
     bucket: string
@@ -17,11 +18,34 @@ export interface S3DriveConfig{
     }
 }
 
+export type Base64Data = string | ReadableStream<any> | Uint8Array
+
+export enum GetTypes {
+    string = "string",
+    byteArray = "byteArray",
+    webStream = "webStream",
+    base64 = "base64",
+}
+
+export interface MimeTypeResponse{
+    ContentType: string
+    ContentEncoding: string | null
+}
+
 export interface PutOptions {
     ACL: "private" | "public-read" | "public-read-write" | "authenticated-read" | "aws-exec-read" | "bucket-owner-read" | "bucket-owner-full-control",
 }
 
-export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
+export interface s3DriveResponse{
+    get: (filePath: string) => Promise<ResponseMetadata>
+    put: (filePath: string, body: any, options?: PutOptions) => Promise<any>
+    remove: (filePath: string) => Promise<ResponseMetadata>
+    formatBase64StringIntoUrlData: (base64EncodedData: string | ReadableStream<any> | Uint8Array, type: string) => string,
+    convertBase64StringToImageData: (base64EncodedData: string) => Buffer,
+    determineMimeType:(filePath: string) => MimeTypeResponse
+}
+
+export const s3Drive = (s3DriveConfig: S3DriveConfig): s3DriveResponse => {
     const Bucket = s3DriveConfig.bucket
     const client = new S3Client({
         forcePathStyle: s3DriveConfig.forcePathStyle,
@@ -33,11 +57,12 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         }
     });
 
+
     /**
      * Helpers
-        * determineMimeType
-        * convertBufferToBase64String
-        * convertBase64StringToImageData
+        - determineMimeType
+        - formatBase64StringIntoUrlData
+        - convertBase64StringToImageData
      */
 
 
@@ -46,7 +71,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
      * returns {ContentType, ContentEncoding}
      * @param filePath
      */
-    const determineMimeType = (filePath: string): {ContentType: string, ContentEncoding: string} => {
+    const determineMimeType = (filePath: string): MimeTypeResponse => {
         if(filePath?.includes('/')){
             filePath = filePath.split('/').reverse()[0]
         }
@@ -59,8 +84,8 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
             }
         }
         return {
-            ContentType: contentType[0],
-            ContentEncoding: contentType[1] ?? '',
+            ContentType: contentType[0] ?? null,
+            ContentEncoding: contentType[1] ?? null,
         }
     }
 
@@ -69,7 +94,8 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
      * @param base64EncodedData
      * @param type
      */
-    const formatBase64StringIntoUrlData = (base64EncodedData: string | ReadableStream<any> | Uint8Array, type: string): string => `data:${type};base64,${base64EncodedData.toString()}`
+    const formatBase64StringIntoUrlData = (base64EncodedData: Base64Data, type: string): string =>
+        `data:${type};base64,${base64EncodedData.toString()}`
 
 
     /**
@@ -81,7 +107,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         return Buffer.from(base64StringSplit, 'base64')
     }
 
-    const put = async (filePath: string, body: any, options?:PutOptions) => {
+    const put = async (filePath: string, body: any, options?: PutOptions): Promise<ResponseMetadata> => {
         const defaultACL = 'public-read'
         if(!options){
             options = {ACL: defaultACL}
@@ -102,7 +128,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         }
     }
 
-    const get = async (filePath: string, type?: 'string' | 'byteArray' | 'webStream' | 'base64') => {
+    const get = async (filePath: string, type?: GetTypes): Promise<any> => {
         const command = new GetObjectCommand({
             Bucket,
             Key: filePath,
@@ -111,11 +137,11 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         try {
             const response = await client.send(command);
 
-            if(type === 'webStream'){
+            if (type === 'webStream') {
                 return  response.Body.transformToWebStream();
-            } else if(type === 'byteArray'){
+            } else if(type === 'byteArray') {
                 return await response.Body.transformToByteArray()
-            } else if(type==='base64'){
+            } else if(type==='base64') {
                 return await response.Body.transformToString('base64')
             }
 
@@ -124,7 +150,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
             return Promise.reject(err)
         }
     }
-    const remove = async (filePath: string) => {
+    const remove = async (filePath: string): Promise<ResponseMetadata> => {
         const command = new DeleteObjectCommand({
             Bucket,
             Key: filePath,
@@ -143,7 +169,9 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         get,
         put,
         remove,
+        // Helpers
         formatBase64StringIntoUrlData,
-        convertBase64StringToImageData
+        convertBase64StringToImageData,
+        determineMimeType
     }
 }
