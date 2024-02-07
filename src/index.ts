@@ -32,7 +32,7 @@ export interface PutOptions {
 }
 
 export interface s3DriveResponse{
-    get: (filePath: string, type?: GetTypes) => Promise<ResponseMetadata>
+    get: (filePath: string, type?: GetTypes) => Promise<any>
     put: (filePath: string, body: any, options?: PutOptions) => Promise<any>
     remove: (filePath: string) => Promise<ResponseMetadata>
     formatBase64StringIntoUrlData: (base64EncodedData: string | ReadableStream<any> | Uint8Array, type: string) => string,
