@@ -50,6 +50,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         if(filePath?.includes('/')){
             filePath = filePath.split('/').reverse()[0]
         }
+
         const contentType = mime?.contentType(filePath)?.toString()?.replace(';','').split(' ')
         if(!contentType[0] && !contentType[1]){
             return {
@@ -59,17 +60,16 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         }
         return {
             ContentType: contentType[0],
-            ContentEncoding: contentType[1],
+            ContentEncoding: contentType[1] ?? '',
         }
     }
 
     /**
-     * Convert buffer data into Base64 encoded string
-     * @param bufferData
+     * Format a Base64 encoded string into valid url data
+     * @param base64EncodedData
      * @param type
      */
-    const convertBufferToBase64String = (bufferData: Buffer, type: string): string =>
-      `data:${type};base64,${Buffer.from(bufferData).toString('base64')}`
+    const formatBase64StringIntoUrlData = (base64EncodedData: string | ReadableStream<any> | Uint8Array, type: string): string => `data:${type};base64,${base64EncodedData.toString()}`
 
 
     /**
@@ -102,7 +102,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         }
     }
 
-    const get = async (filePath: string, type?: 'string' | 'byteArray' | 'webStream') => {
+    const get = async (filePath: string, type?: 'string' | 'byteArray' | 'webStream' | 'base64') => {
         const command = new GetObjectCommand({
             Bucket,
             Key: filePath,
@@ -110,11 +110,15 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
 
         try {
             const response = await client.send(command);
+
             if(type === 'webStream'){
                 return  response.Body.transformToWebStream();
             } else if(type === 'byteArray'){
                 return await response.Body.transformToByteArray()
+            } else if(type==='base64'){
+                return await response.Body.transformToString('base64')
             }
+
             return await response.Body.transformToString();
         } catch (err) {
             return Promise.reject(err)
@@ -139,7 +143,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         get,
         put,
         remove,
-        convertBufferToBase64String,
+        formatBase64StringIntoUrlData,
         convertBase64StringToImageData
     }
 }
