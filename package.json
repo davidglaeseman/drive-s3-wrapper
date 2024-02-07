@@ -8,7 +8,8 @@
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
-    "test": "tsdx test"
+    "test": "tsdx test",
+    "pubs": "yarn build && yarn test && yarn publish"
   },
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
