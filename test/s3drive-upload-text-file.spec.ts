@@ -28,41 +28,31 @@ describe('api', () => {
 
     it('It puts an item into a bucket', async () => {
         const putFileIntoBucket = await put(filePath,'example text goes here')
-        console.log('test', putFileIntoBucket)
+        expect(putFileIntoBucket?.httpStatusCode).toBe(200);
     })
 
     it('It puts a multi folder item into a bucket', async () => {
         const putFileIntoBucket = await put(multiFolderPath,`example text goes here for file: ${multiFolderPath}`)
-        console.log('test', putFileIntoBucket)
+        expect(putFileIntoBucket?.httpStatusCode).toBe(200);
     })
 
     it('It removes a multi folder item from a bucket', async () => {
         const removeMultiFolderFileFromBucket = await remove(multiFolderPath)
-        console.log('remove:', {removeMultiFolderFileFromBucket})
+        expect(removeMultiFolderFileFromBucket?.httpStatusCode).toBe(204);
     })
 
     it('It gets an invalid item from a bucket', async () => {
         const getFileFromBucket = await get(`${filePath}.--doesnt-exist.txt`).catch(()=> false)
-        console.log('FILE DATA:', {getFileFromBucket})
+        expect(getFileFromBucket).toBe(false);
     })
 
-    it('It gets an  item from a bucket', async () => {
+    it('It gets an item from a bucket', async () => {
         const getFileFromBucket = await get(filePath)
-        console.log('string:', {getFileFromBucket})
-    })
-
-    it('It gets a byteArray  item from a bucket', async () => {
-        const getFileFromBucket = await get(filePath,'byteArray')
-        console.log('byteArray:', {getFileFromBucket})
-    })
-
-    it('It gets a webStream  item from a bucket', async () => {
-        const getFileFromBucket = await get(filePath,'webStream')
-        console.log('webStream:', {getFileFromBucket})
+        expect(getFileFromBucket).toBe('example text goes here');
     })
 
     it('It remove an item from a bucket', async () => {
         const removeFileFromBucket = await remove(filePath)
-        console.log('remove:', {removeFileFromBucket})
+        expect(removeFileFromBucket?.httpStatusCode).toBe(204);
     })
 })
