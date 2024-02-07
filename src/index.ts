@@ -33,10 +33,24 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         }
     });
 
+    /**
+     * Helpers
+        * determineMimeType
+        * convertBufferToBase64String
+        * convertBase64StringToImageData
+     */
+
+
+    /**
+     * Get the mime type from the file path
+     * returns {ContentType, ContentEncoding}
+     * @param filePath
+     */
     const determineMimeType = (filePath: string): {ContentType: string, ContentEncoding: string} => {
         if(filePath?.includes('/')){
             filePath = filePath.split('/').reverse()[0]
         }
+
         const contentType = mime?.contentType(filePath)?.toString()?.replace(';','').split(' ')
         if(!contentType[0] && !contentType[1]){
             return {
@@ -46,15 +60,33 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         }
         return {
             ContentType: contentType[0],
-            ContentEncoding: contentType[1],
+            ContentEncoding: contentType[1] ?? '',
         }
     }
 
+    /**
+     * Format a Base64 encoded string into valid url data
+     * @param base64EncodedData
+     * @param type
+     */
+    const formatBase64StringIntoUrlData = (base64EncodedData: string | ReadableStream<any> | Uint8Array, type: string): string => `data:${type};base64,${base64EncodedData.toString()}`
+
+
+    /**
+     * Convert Base64 encoded string into buffer data
+     * @param base64String
+     */
+    const convertBase64StringToImageData = (base64String: string): Buffer => {
+        const base64StringSplit = base64String?.split(';base64,').pop()
+        return Buffer.from(base64StringSplit, 'base64')
+    }
+
     const put = async (filePath: string, body: any, options?:PutOptions) => {
+        const defaultACL = 'public-read'
         if(!options){
-            options = {ACL:'public-read'}
+            options = {ACL: defaultACL}
         } else if(!options?.ACL){
-            options.ACL = 'public-read'
+            options.ACL = defaultACL
         }
         try {
             const response = await client.send(new PutObjectCommand({
@@ -70,7 +102,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         }
     }
 
-    const get = async (filePath: string, type?: 'string' | 'byteArray' | 'webStream') => {
+    const get = async (filePath: string, type?: 'string' | 'byteArray' | 'webStream' | 'base64') => {
         const command = new GetObjectCommand({
             Bucket,
             Key: filePath,
@@ -78,11 +110,15 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
 
         try {
             const response = await client.send(command);
+
             if(type === 'webStream'){
                 return  response.Body.transformToWebStream();
             } else if(type === 'byteArray'){
                 return await response.Body.transformToByteArray()
+            } else if(type==='base64'){
+                return await response.Body.transformToString('base64')
             }
+
             return await response.Body.transformToString();
         } catch (err) {
             return Promise.reject(err)
@@ -106,6 +142,8 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
     return {
         get,
         put,
-        remove
+        remove,
+        formatBase64StringIntoUrlData,
+        convertBase64StringToImageData
     }
 }
