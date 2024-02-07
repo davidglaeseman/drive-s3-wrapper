@@ -39,8 +39,15 @@ export interface PutOptions {
 }
 
 export interface s3DriveResponse {
-	get: (filePath: string, type?: GetTypes) => Promise<ReadableStream | Uint8Array | string>;
-	put: (filePath: string, body: string | Buffer, options?: PutOptions) => Promise<ResponseMetadata>;
+	get: (
+		filePath: string,
+		type?: GetTypes,
+	) => Promise<ReadableStream | Uint8Array | string>;
+	put: (
+		filePath: string,
+		body: string | Buffer,
+		options?: PutOptions,
+	) => Promise<ResponseMetadata>;
 	remove: (filePath: string) => Promise<ResponseMetadata>;
 	formatBase64StringIntoUrlData: (
 		base64EncodedData: string | ReadableStream<string | Buffer> | Uint8Array,
@@ -75,7 +82,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig): s3DriveResponse => {
 	 * @param filePath
 	 */
 	const determineMimeType = (filePath: string): MimeTypeResponse => {
-		let fileUpdatedFilePath = filePath
+		let fileUpdatedFilePath = filePath;
 		if (filePath?.includes("/")) {
 			fileUpdatedFilePath = filePath.split("/").reverse()[0];
 		}
@@ -127,7 +134,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig): s3DriveResponse => {
 					Bucket,
 					Key: filePath,
 					Body: body,
-					ACL: options?.ACL ?? 'public-read',
+					ACL: options?.ACL ?? "public-read",
 					...options,
 					...determineMimeType(filePath),
 				}),
@@ -138,7 +145,10 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig): s3DriveResponse => {
 		}
 	};
 
-	const get = async (filePath: string, type?: GetTypes): Promise<ReadableStream | Uint8Array | string> => {
+	const get = async (
+		filePath: string,
+		type?: GetTypes,
+	): Promise<ReadableStream | Uint8Array | string> => {
 		const command = new GetObjectCommand({
 			Bucket,
 			Key: filePath,
@@ -159,11 +169,9 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig): s3DriveResponse => {
 				return await response.Body.transformToString("base64");
 			}
 
-			if(type === 'string' || !type){
+			if (type === "string" || !type) {
 				return await response.Body.transformToString();
 			}
-
-
 		} catch (err) {
 			return Promise.reject(err);
 		}
