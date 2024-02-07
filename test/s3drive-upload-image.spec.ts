@@ -33,6 +33,7 @@ describe('api', () => {
 
     it('It gets an  item from a bucket', async () => {
         const getFileFromBucket = await get(filePath,'base64')
+        console.log({getFileFromBucket})
         const base64Data = formatBase64StringIntoUrlData(getFileFromBucket,'image/png')
         console.log('Upload Matches Download',imageData === base64Data)
     })
