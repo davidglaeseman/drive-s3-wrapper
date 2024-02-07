@@ -33,6 +33,19 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         }
     });
 
+    /**
+     * Helpers
+        * determineMimeType
+        * convertBufferToBase64String
+        * convertBase64StringToImageData
+     */
+
+
+    /**
+     * Get the mime type from the file path
+     * returns {ContentType, ContentEncoding}
+     * @param filePath
+     */
     const determineMimeType = (filePath: string): {ContentType: string, ContentEncoding: string} => {
         if(filePath?.includes('/')){
             filePath = filePath.split('/').reverse()[0]
@@ -50,11 +63,30 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
         }
     }
 
+    /**
+     * Convert buffer data into Base64 encoded string
+     * @param bufferData
+     * @param type
+     */
+    const convertBufferToBase64String = (bufferData: Buffer, type: string): string =>
+      `data:${type};base64,${Buffer.from(bufferData).toString('base64')}`
+
+
+    /**
+     * Convert Base64 encoded string into buffer data
+     * @param base64String
+     */
+    const convertBase64StringToImageData = (base64String: string): Buffer => {
+        const base64StringSplit = base64String?.split(';base64,').pop()
+        return Buffer.from(base64StringSplit, 'base64')
+    }
+
     const put = async (filePath: string, body: any, options?:PutOptions) => {
+        const defaultACL = 'public-read'
         if(!options){
-            options = {ACL:'public-read'}
+            options = {ACL: defaultACL}
         } else if(!options?.ACL){
-            options.ACL = 'public-read'
+            options.ACL = defaultACL
         }
         try {
             const response = await client.send(new PutObjectCommand({
@@ -106,6 +138,8 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
     return {
         get,
         put,
-        remove
+        remove,
+        convertBufferToBase64String,
+        convertBase64StringToImageData
     }
 }
