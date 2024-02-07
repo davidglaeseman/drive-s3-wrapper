@@ -39,10 +39,10 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.507.0",
     "@types/mime-types": "^2.1.4",
-    "dotenv": "^16.4.1",
     "mime-types": "^2.1.35"
   },
   "devDependencies": {
+    "dotenv": "^16.4.1",
     "ts-node": "^10.9.2",
     "tsdx": "^0.14.1",
     "typescript": "^5.3.3"
