@@ -5,7 +5,6 @@ import {
     S3Client
 } from "@aws-sdk/client-s3";
 import * as mime from 'mime-types'
-import 'dotenv/config'
 
 export interface S3DriveConfig{
     bucket: string
