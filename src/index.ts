@@ -20,12 +20,7 @@ export interface S3DriveConfig{
 
 export type Base64Data = string | ReadableStream<any> | Uint8Array
 
-export enum GetTypes {
-    string = "string",
-    byteArray = "byteArray",
-    webStream = "webStream",
-    base64 = "base64",
-}
+export type GetTypes = 'string' | 'byteArray' | 'webStream' | 'base64'
 
 export interface MimeTypeResponse{
     ContentType: string
