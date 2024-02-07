@@ -8,13 +8,38 @@
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
-    "test": "tsdx build && tsdx test"
+    "test": "tsdx test"
+  },
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "module": "dist/web-components.esm.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/drive-s3-wrapper.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
   },
   "publishConfig": {
     "@davidglaeseman:registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.507.0",
-    "tsdx": "^0.14.1"
+    "dotenv": "^16.4.1",
+    "ts-node": "^10.9.2",
+    "tsdx": "^0.14.1",
+    "typescript": "^5.3.3"
   }
 }
