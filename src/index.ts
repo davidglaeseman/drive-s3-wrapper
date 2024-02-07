@@ -39,7 +39,6 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
             filePath = filePath.split('/').reverse()[0]
         }
         const contentType = mime?.contentType(filePath)?.toString()?.replace(';','').split(' ')
-        console.log({contentType})
         if(!contentType[0] && !contentType[1]){
             return {
                 ContentType: 'text/plain',
