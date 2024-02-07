@@ -1,8 +1,17 @@
 import {s3Drive} from "../src";
+import 'dotenv/config'
 
 const filePath = 'example-file.txt'
 
 describe('api', () => {
+
+    if(!process.env.S3_BUCKET){
+        it('No Bucket', async () => {
+            console.log('No Bucket')
+        })
+        return
+    }
+
     it('It puts an item into a bucket', async () => {
         const { put } = s3Drive()
         const putFileIntoBucket = await put(filePath,'example text goes here')
