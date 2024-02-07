@@ -9,7 +9,6 @@ jobs:
     strategy:
       matrix:
         node-version: [20.x]
-        redis-version: [6.x]
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
@@ -17,10 +16,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
-      - name: Start Redis
-        uses: shogo82148/actions-setup-redis@v1
-        with:
-          redis-version: ${{ matrix.redis-version }}
       - run: yarn
       - run: yarn build
       - run: yarn test
