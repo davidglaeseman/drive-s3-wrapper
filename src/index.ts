@@ -4,7 +4,7 @@ import {
     PutObjectCommand,
     S3Client
 } from "@aws-sdk/client-s3";
-import mime = require('mime-types')
+import * as mime from 'mime-types'
 import 'dotenv/config'
 
 export interface S3DriveConfig{
@@ -35,7 +35,11 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
     });
 
     const determineMimeType = (filePath: string): {ContentType: string, ContentEncoding: string} => {
+        if(filePath?.includes('/')){
+            filePath = filePath.split('/').reverse()[0]
+        }
         const contentType = mime?.contentType(filePath)?.toString()?.replace(';','').split(' ')
+        console.log({contentType})
         if(!contentType[0] && !contentType[1]){
             return {
                 ContentType: 'text/plain',
@@ -49,7 +53,6 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig) => {
     }
 
     const put = async (filePath: string, body: any, options?:PutOptions) => {
-        console.log(determineMimeType(filePath))
         if(!options){
             options = {ACL:'public-read'}
         } else if(!options?.ACL){
