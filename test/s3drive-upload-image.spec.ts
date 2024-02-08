@@ -14,7 +14,7 @@ const config = {
         secretAccessKey: process.env.S3_SECRET
     }
 }
-const { put, get,  formatBase64StringIntoUrlData, convertBase64StringToImageData } = s3Drive(config)
+const { put, get, formatBase64StringIntoUrlData, convertBase64StringToImageData } = s3Drive(config)
 
 
 describe('api', () => {
@@ -26,15 +26,14 @@ describe('api', () => {
         return
     }
 
-    it('It puts an item into a bucket', async () => {
-        const putFileIntoBucket = await put(filePath,convertBase64StringToImageData(imageData))
-        console.log('test', putFileIntoBucket)
+    it('Upload base64 encoded png file to bucket as raw image data', async () => {
+        const putFileIntoBucket = await put(filePath,convertBase64StringToImageData(imageData));
+        expect(putFileIntoBucket?.httpStatusCode).toBe(200);
     })
 
-    it('It gets an  item from a bucket', async () => {
+    it('Download raw image data and convert to png, which should match original data', async () => {
         const getFileFromBucket = await get(filePath,'base64')
-        console.log({getFileFromBucket})
         const base64Data = formatBase64StringIntoUrlData(getFileFromBucket,'image/png')
-        console.log('Upload Matches Download',imageData === base64Data)
+        expect(base64Data).toBe(imageData);
     })
 })
