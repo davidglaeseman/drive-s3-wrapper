@@ -126,7 +126,12 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig): s3DriveResponse => {
 		return Buffer.from(base64StringSplit, "base64");
 	};
 
-	const fullFilePath = (filePath: string) => s3DriveConfig?.rootFolder ? `${s3DriveConfig?.rootFolder}${filePath}` : filePath
+
+	/**
+	 * Add the root folder to the current file path
+	 * @param filePath
+	 */
+	const fullFilePath = (filePath: string): string => s3DriveConfig?.rootFolder ? `${s3DriveConfig?.rootFolder}${filePath}` : filePath
 
 	const put = async (
 		filePath: string,
