@@ -38,7 +38,7 @@ describe('api', () => {
 
     it('It removes a multi folder item from a bucket', async () => {
         const removeMultiFolderFileFromBucket = await remove(multiFolderPath)
-        expect(removeMultiFolderFileFromBucket?.httpStatusCode).toBe(204);
+        expect(removeMultiFolderFileFromBucket).toBe(true);
     })
 
     it('It gets an invalid item from a bucket', async () => {
@@ -63,6 +63,6 @@ describe('api', () => {
 
     it('It remove an item from a bucket', async () => {
         const removeFileFromBucket = await remove(filePath)
-        expect(removeFileFromBucket?.httpStatusCode).toBe(204);
+        expect(removeFileFromBucket).toBe(true);
     })
 })

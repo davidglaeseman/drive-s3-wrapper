@@ -13,6 +13,7 @@ export interface S3DriveConfig {
 	forcePathStyle: boolean;
 	endpoint: string;
 	region: string;
+	rootFolder?: string;
 	credentials: {
 		accessKeyId: string;
 		secretAccessKey: string;
@@ -49,7 +50,7 @@ export interface s3DriveResponse {
 		body: string | Buffer,
 		options?: PutOptions,
 	) => Promise<ResponseMetadata>;
-	remove: (filePath: string) => Promise<ResponseMetadata>;
+	remove: (filePath: string) => Promise<boolean>;
 	exists: (filePath: string) => Promise<boolean>;
 	formatBase64StringIntoUrlData: (
 		base64EncodedData: string | ReadableStream<string | Buffer> | Uint8Array,
@@ -125,6 +126,8 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig): s3DriveResponse => {
 		return Buffer.from(base64StringSplit, "base64");
 	};
 
+	const fullFilePath = (filePath: string) => s3DriveConfig?.rootFolder ? `${s3DriveConfig?.rootFolder}${filePath}` : filePath
+
 	const put = async (
 		filePath: string,
 		body: string | Buffer,
@@ -134,7 +137,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig): s3DriveResponse => {
 			const response = await client.send(
 				new PutObjectCommand({
 					Bucket,
-					Key: filePath,
+					Key: fullFilePath(filePath),
 					Body: body,
 					ACL: options?.ACL ?? "public-read",
 					...options,
@@ -153,7 +156,7 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig): s3DriveResponse => {
 	): Promise<ReadableStream | Uint8Array | string> => {
 		const command = new GetObjectCommand({
 			Bucket,
-			Key: filePath,
+			Key: fullFilePath(filePath),
 		});
 
 		try {
@@ -178,24 +181,24 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig): s3DriveResponse => {
 			return Promise.reject(err);
 		}
 	};
-	const remove = async (filePath: string): Promise<ResponseMetadata> => {
+	const remove = async (filePath: string): Promise<boolean> => {
 		const command = new DeleteObjectCommand({
 			Bucket,
-			Key: filePath,
+			Key: fullFilePath(filePath),
 		});
 
 		try {
 			const response = await client.send(command);
-			return response.$metadata;
+			return response.$metadata.httpStatusCode === 204
 		} catch (err) {
-			return Promise.reject(err);
+			return false
 		}
 	};
 
 	const exists = async(filePath: string): Promise<boolean> => {
 		const command = new HeadObjectCommand({
 			Bucket,
-			Key: filePath,
+			Key: fullFilePath(filePath),
 		});
 		try {
 			const response = await client.send(command);
