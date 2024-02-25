@@ -1,6 +1,6 @@
 {
   "name": "drive-s3-wrapper",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "author": "David Glaeseman",
   "type": "module",
   "description": "Agnostic wrapper for AWS S3 ➔ But intended to be used by adonis.js",
