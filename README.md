@@ -40,6 +40,13 @@ const removeResponse = await put('new-file.png')
 console.log({ removeResponse })
 ````
 
+#### exists
+````typescript
+const { exists } = s3Drive(s3Config)
+const doesFileExist = await exists('new-file.png')
+console.log({ doesFileExist })
+````
+
 ## Helpers
 #### formatBase64StringIntoUrlData
 ````typescript
