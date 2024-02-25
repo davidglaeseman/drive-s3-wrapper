@@ -2,6 +2,7 @@ import {
 	DeleteObjectCommand,
 	GetObjectCommand,
 	PutObjectCommand,
+	HeadObjectCommand,
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { ResponseMetadata } from "@smithy/types/dist-types/response";
@@ -49,6 +50,7 @@ export interface s3DriveResponse {
 		options?: PutOptions,
 	) => Promise<ResponseMetadata>;
 	remove: (filePath: string) => Promise<ResponseMetadata>;
+	exists: (filePath: string) => Promise<boolean>;
 	formatBase64StringIntoUrlData: (
 		base64EncodedData: string | ReadableStream<string | Buffer> | Uint8Array,
 		type: string,
@@ -190,10 +192,24 @@ export const s3Drive = (s3DriveConfig: S3DriveConfig): s3DriveResponse => {
 		}
 	};
 
+	const exists = async(filePath: string): Promise<boolean> => {
+		const command = new HeadObjectCommand({
+			Bucket,
+			Key: filePath,
+		});
+		try {
+			const response = await client.send(command);
+			return response.$metadata.httpStatusCode === 200
+		} catch (err) {
+			return false
+		}
+	}
+
 	return {
 		get,
 		put,
 		remove,
+		exists,
 		// Helpers
 		formatBase64StringIntoUrlData,
 		convertBase64StringToImageData,

@@ -14,7 +14,7 @@ const config = {
         secretAccessKey: process.env.S3_SECRET
     }
 }
-const { put, get, remove } = s3Drive(config)
+const { put, get, remove, exists } = s3Drive(config)
 
 
 describe('api', () => {
@@ -49,6 +49,16 @@ describe('api', () => {
     it('It gets an item from a bucket', async () => {
         const getFileFromBucket = await get(filePath)
         expect(getFileFromBucket).toBe('example text goes here');
+    })
+
+    it('It checks the existence of a file', async () => {
+        const checkFile = await exists(filePath)
+        expect(checkFile).toBe(true)
+    })
+
+    it('It checks the existence of an invalid file', async () => {
+        const checkFile = await exists(`${filePath}-test.txt`)
+        expect(checkFile).toBe(false)
     })
 
     it('It remove an item from a bucket', async () => {

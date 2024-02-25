@@ -14,7 +14,7 @@ const config = {
         secretAccessKey: process.env.S3_SECRET
     }
 }
-const { put, get, formatBase64StringIntoUrlData, convertBase64StringToImageData } = s3Drive(config)
+const { put, get, formatBase64StringIntoUrlData, convertBase64StringToImageData, exists } = s3Drive(config)
 
 
 describe('api', () => {
@@ -36,4 +36,15 @@ describe('api', () => {
         const base64Data = formatBase64StringIntoUrlData(getFileFromBucket,'image/png')
         expect(base64Data).toBe(imageData);
     })
+
+    it('It checks the existence of a file', async () => {
+        const checkFile = await exists(filePath)
+        expect(checkFile).toBe(true)
+    })
+
+    it('It checks the existence of an invalid file', async () => {
+        const checkFile = await exists(`${filePath}-test.txt`)
+        expect(checkFile).toBe(false)
+    })
+
 })
